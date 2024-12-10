@@ -4,6 +4,8 @@ import Edit from './components/Edit.vue'
 import axios from 'axios'
 // TODO: 列表渲染
 const list = ref([])
+const editRef = ref(null)
+
 const getList = async () =>{
   const res = await axios.get('/list')
   list.value = res.data
@@ -12,9 +14,34 @@ const getList = async () =>{
 onMounted (()=>{getList()})
 
 // TODO: 删除功能
+//获取ID 删除 更新视图
+
+const onDelete = async (id) => {
+    console.log(id) 
+    await axios.delete(`/del/${id}`)
+    getList()
 
 
+}
 // TODO: 编辑功能
+//1.打开弹窗2.回填数据（接口/静态数据）3.更新视图
+
+const onEdit = (rowd) => {
+
+  editRef.value.open(rowd)
+  
+
+}
+
+const onFormChange = (form) =>{
+  axios.patch(`/edit/${form.id}`, {
+  name: form.name,
+  place: form.place,
+})
+getList()
+  
+  
+} 
 
 </script>
 
@@ -25,14 +52,14 @@ onMounted (()=>{getList()})
       <el-table-column label="姓名" prop="name" width="150"></el-table-column>
       <el-table-column label="籍贯" prop="place"></el-table-column>
       <el-table-column label="操作" width="150">
-        <template #default>
-          <el-button type="primary" link>编辑</el-button>
-          <el-button type="danger" link>删除</el-button>
+        <template #default="{row}">
+          <el-button type="primary" @click="onEdit(row)" link>编辑</el-button>
+          <el-button type="danger" @click="onDelete(row.id)" link>删除</el-button>
         </template>
       </el-table-column>
     </el-table>
   </div>
-  <Edit />
+  <Edit ref="editRef" @form-change="onFormChange"/>
 </template>
 
 <style scoped>
